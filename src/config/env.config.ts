@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { cleanEnv, str, port } from 'envalid';
+import { cleanEnv, str, port, bool } from 'envalid';
 
 dotenv.config();
 
@@ -11,6 +11,7 @@ export const envConfig = cleanEnv(process.env, {
   DB_USERNAME: str(),
   DB_PASSWORD: str(),
   DB_DATABASE: str(),
+  DB_SSL: bool({default: false}),
   SECRET_KEY_ONE: str(),
   SECRET_KEY_TWO: str(),
   REACT_URL: str(),

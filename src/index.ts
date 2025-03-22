@@ -4,8 +4,7 @@ import express from 'express';
 import cookieSession from 'cookie-session';
 import cors from 'cors';
 import { envConfig } from './config/env.config';
-
-
+import { AppDataSource } from './database/config';
 
 async function bootstrap() {
   const app = express();
@@ -32,6 +31,11 @@ async function bootstrap() {
   } catch (error) {
     console.log(`[X] Error starting server ${error}`)
   }
-}
+};
 
-bootstrap().catch(console.error);
+AppDataSource.initialize().then(() => {
+  console.log('[+] Postgres DB connected successfully...');
+  bootstrap().catch(console.error);
+}).catch(error => {
+  console.log(`[X] Error connecting to Postgres Database: ${error?.message || error}`);
+})
