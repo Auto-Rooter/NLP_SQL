@@ -19,9 +19,25 @@ async function bootstrap() {
   const app = express();
   const httpServer: http.Server = new http.Server(app);
 
+  const typeDefs = `#graphql
+    type Book {
+      title: String!
+    }
+
+    type Query {
+      books: [Book]
+    }
+  `;
+
+  const resolvers = {
+    Query: {
+      books: () => []
+    }
+  };
+
   const schema: GraphQLSchema = makeExecutableSchema({
-    typeDefs: mergedGQLSchema,
-    resolvers: mergedGQLResolvers
+    typeDefs,
+    resolvers
   });
   const server = new ApolloServer({
     schema,
