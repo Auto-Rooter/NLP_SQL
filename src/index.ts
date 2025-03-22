@@ -9,11 +9,12 @@ import { GraphQLSchema, GraphQLFormattedError } from 'graphql';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { mergedGQLSchema } from './graphql/schemas';
 import { mergedGQLResolvers } from './graphql/resolvers';
-import { ApolloServer } from '@apollo/server';
+import { ApolloServer, BaseContext } from '@apollo/server';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { ApolloServerPluginLandingPageDisabled } from '@apollo/server/plugin/disabled';
 import { expressMiddleware, ExpressContextFunctionArgument } from '@apollo/server/express4';
+import { AppContext } from './interfaces/auth.interface';
 
 async function bootstrap() {
   const app = express();
@@ -39,7 +40,7 @@ async function bootstrap() {
     typeDefs,
     resolvers
   });
-  const server = new ApolloServer({
+  const server = new ApolloServer<BaseContext | AppContext>({
     schema,
     formatError(error: GraphQLFormattedError){
       return {
