@@ -5,11 +5,34 @@ import cookieSession from 'cookie-session';
 import cors from 'cors';
 import { envConfig } from './config/env.config';
 import { AppDataSource } from './database/config';
+import { GraphQLSchema, GraphQLFormattedError } from 'graphql';
+import { makeExecutableSchema } from '@graphql-tools/schema';
+import { mergedGQLSchema } from './graphql/schemas';
+import { mergedGQLResolvers } from './graphql/resolvers';
+import { ApolloServer } from '@apollo/server';
+import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 
 async function bootstrap() {
   const app = express();
   const httpServer: http.Server = new http.Server(app);
 
+  const schema: GraphQLSchema = makeExecutableSchema({
+    typeDefs: mergedGQLSchema,
+    resolvers: mergedGQLResolvers
+  });
+  const server = new ApolloServer({
+    schema,
+    formatError(error: GraphQLFormattedError){
+      return {
+        message: error?.message,
+        code: error?.extensions?.code || 'INTERNAL_SERVER_ERROR',
+      }
+    },
+    introspection: envConfig?.NODE_ENV != 'production' ? true : false,
+    plugins: [
+      ApolloServerPluginDrainHttpServer({ httpServer })
+    ]
+  });
   app.set('trust proxy', 1);
   app.use(
     cookieSession({
