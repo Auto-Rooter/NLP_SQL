@@ -3,6 +3,9 @@ import http from 'http';
 import express from 'express';
 import cookieSession from 'cookie-session';
 import cors from 'cors';
+import { envConfig } from './config/env.config';
+
+
 
 async function bootstrap() {
   const app = express();
@@ -12,19 +15,19 @@ async function bootstrap() {
   app.use(
     cookieSession({
       name: 'session',
-      keys: ['213df23r23r2343', 'arqwrrq343r2v32323'],
+      keys: [envConfig?.SECRET_KEY_ONE, envConfig?.SECRET_KEY_TWO],
       maxAge: 24 * 7 * 3600 * 1000, // 7 days
   }));
   const corsOptions = {
-    origin: ['http://localhost:4000', 'http://localhost:4200'],
+    origin: [envConfig?.ANGULAR_URL, envConfig?.REACT_URL],
     credentials: true,
     methods: ['GET', 'POST' ,'PUT', 'DELETE', 'OPTIONS'],
   };
   app.use(cors(corsOptions));
 
   try{
-    httpServer.listen(5000, () => {
-      console.log(`[+] Server running on port: ${5000}`);
+    httpServer.listen(envConfig?.PORT, () => {
+      console.log(`[+] Server running on port: ${envConfig?.PORT}`);
     });
   } catch (error) {
     console.log(`[X] Error starting server ${error}`)
