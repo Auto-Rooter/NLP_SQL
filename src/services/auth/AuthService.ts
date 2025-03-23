@@ -1,13 +1,14 @@
 import { AppDataSource } from "@/database/config";
 import { User } from "@/entities/user.entity";
 import { AppContext, IActiveProject, IAuth, TokenPayload } from "@/interfaces/auth.interface";
+import { IAuthPayload } from "@/interfaces/datasource.interface";
 import { ValidationService } from "./ValidationService";
 import { hashPassword, verifyPassword } from "@/utils/utils";
 import { generateAccessToken } from "@/utils/token-util";
 import { GraphQLError } from "graphql";
 
 export class AuthService {
-  static async register(input: IAuth, context: AppContext){
+  static async register(input: IAuth, context: AppContext): Promise<IAuthPayload>{
     const userRepository = AppDataSource.getRepository(User);
     const { email, password } = input;
     const { req } = context;
@@ -41,7 +42,7 @@ export class AuthService {
     }
   }
 
-  static async login(input: IAuth, context: AppContext){
+  static async login(input: IAuth, context: AppContext): Promise<IAuthPayload>{
     const userRepository = AppDataSource.getRepository(User);
     const { email, password } = input;
     const { req } = context;
@@ -78,5 +79,13 @@ export class AuthService {
         email: user?.email
       }
     }
+  }
+
+  static logout(context: AppContext): string{
+    const { req } = context;
+    req.session = null;
+    req.currentUser = undefined;
+
+    return 'Logout successful';
   }
 }
