@@ -18,7 +18,7 @@ export const authSchema = buildSchema(`#graphql
       type: String!
     }
 
-    type: UserResponse {
+    type UserResponse {
       user: User!
       projectIds: [DataSource!]
       collections: [String!]
