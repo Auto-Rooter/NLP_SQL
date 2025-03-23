@@ -5,14 +5,16 @@ import { Repository } from 'typeorm';
 import validator from 'validator';
 
 export class ValidationService {
-  static async validateRegistration(input: IAuth, userRepository: Repository<User>){
+  static async validateUser(input: IAuth, userRepository: Repository<User>, type: string){
     if(!validator.isEmail(input?.email)){
       throw new GraphQLError('Invalid email format');
     }
 
-    const existingUser: User | null = await userRepository.findOne({where: {email: input?.email}});
-    if(existingUser){
-      throw new GraphQLError('Invalid credentials');
+    if(type === 'register'){
+      const existingUser: User | null = await userRepository.findOne({where: {email: input?.email}});
+      if(existingUser){
+        throw new GraphQLError('Invalid credentials');
+      }
     }
 
     if(input?.password?.length < 7){
