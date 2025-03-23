@@ -1,2 +1,3 @@
+import { AuthResolver } from './auth';
 
-export const mergedGQLResolvers = [];
+export const mergedGQLResolvers = [AuthResolver];
