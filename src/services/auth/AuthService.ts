@@ -2,6 +2,8 @@ import { AppDataSource } from "@/database/config";
 import { User } from "@/entities/user.entity";
 import { AppContext, IActiveProject, IAuth, TokenPayload } from "@/interfaces/auth.interface";
 import { ValidationService } from "./ValidationService";
+import { hashPassword } from "@/utils/utils";
+import { generateAccessToken } from "@/utils/token-util";
 
 export class AuthService {
   static async register(input: IAuth, context: AppContext){
@@ -11,8 +13,7 @@ export class AuthService {
 
     await ValidationService.validateRegistration(input, userRepository);
 
-    // TODO: Create a password hash method
-    const hashedPassword = password;
+    const hashedPassword: string = await hashPassword(password);
     const user = userRepository.create({
       email,
       password: hashedPassword
@@ -24,9 +25,9 @@ export class AuthService {
       activeProject: {} as IActiveProject
     };
 
-    // TODO: generate access Token
+    const accessToken: string = generateAccessToken(payload);
     req.session = {
-      access: ''
+      access: accessToken
     };
 
     return {
