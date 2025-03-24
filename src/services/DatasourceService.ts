@@ -3,6 +3,7 @@ import { Datasource } from "@/entities/datasource.entity";
 import { AppDataSource } from "@/database/config";
 import { GraphQLError } from "graphql";
 import { decodeBase64 } from "@/utils/utils";
+import { ChartInfo } from "@/entities/chartInfo.entity";
 
 export class DatasourceService {
   static async createNewDataSource(data: IDataSourceDocument): Promise<IDataSourceDocument> {
@@ -53,6 +54,37 @@ export class DatasourceService {
       return datasources;
     }catch(error: any){
       throw new GraphQLError(error?.message);
+    }
+  }
+
+  static async editDataSource(data: IDataSourceDocument): Promise<IDataSourceProjectID[]> {
+    try{
+      const datasourceRepository = AppDataSource.getRepository(Datasource);
+      await datasourceRepository.update({ id: data?.id }, data);
+      return this.getDataSources(`${data?.userId}`) as unknown as IDataSourceProjectID[];
+    }catch(error: any){
+      throw new GraphQLError(error?.message);
+    }
+  }
+
+  static async deleteDatasource(datasourceId: string): Promise<boolean> {
+    const queryRunner = AppDataSource.createQueryRunner();
+
+    try{
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+
+      await queryRunner.manager.delete(ChartInfo, {datasourceId});
+      await queryRunner.manager.delete(Datasource, {id: datasourceId});
+
+      await queryRunner.commitTransaction();
+      return true;
+    }catch(error){
+      await queryRunner.rollbackTransaction();
+      throw new GraphQLError('Failed to delete Datasource');
+    }finally {
+      await queryRunner.release();
+      return false;
     }
   }
 }
